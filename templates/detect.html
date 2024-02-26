@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Detect | {% endblock %}
+{% set headerTitle = "Detect Image Forgery" %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="vstack gap-6">
+    <div class="row g-6 justify-content-around" id="lightgallery">
+      <div class="col-xl-4 col-sm-6">
+          <div class="card border-0 shadow shadow-4-hover">
+              <div class="p-2">
+                <!-- Upload Image Start Here -->
+                  <div class="card shadow-none border-2 border-dashed border-primary-hover position-relative square-container">
+                    <div class="d-flex justify-content-center content">
+                      <label for="file_upload" class="position-absolute w-full h-full top-0 start-0 cursor-pointer">
+                        <input id="file_upload" name="file_upload" type="file" class="visually-hidden" onchange="handleImageUpload()">
+                      </label>
+                      <div id="upload_image">
+                        <div class="text-center h-full d-flex flex-column justify-content-center">
+                          <div class="text-2xl text-muted">
+                            <i class="bi bi-upload"></i>
+                          </div>
+                          <div class="d-flex text-sm mt-3">
+                            <p class="font-semibold">Upload a file or drag and drop</p>
+                          </div>
+                          <p class="text-xs text-gray-500">
+                            PNG, JPG, GIF up to 3MB
+                          </p>
+                        </div>
+                      </div>
+                      <div id="uploaded_image">
+                        <img id="preview_image" class="img-fluid rounded-2 w-full h-full" alt="..." />
+                      </div>
+                    </div>
+                  </div>
+                <!-- Upload Image Ends Here -->
+                <!-- Show Image Start Here -->
+                  <!-- <a href="#" class="d-block">
+                    <img class="img-fluid rounded-2" alt="..." src="https://images.unsplash.com/photo-1651984293033-4f3f465da333?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800&q=80" />
+                  </a> -->
+                <!-- Show Image Ends Here -->
+              </div>
+              <div class="px-4 pt-2 pb-4">
+              <h6 class="font-semibold mb-2 text-center" id="file_name">Upload image to check forgery</h6>
+              <span class="d-block"></span>
+              </div>
+          </div>
+      </div>
+      <div class="col-xl-4 col-sm-6">
+        <div class="card border-0 shadow shadow-4-hover">
+            <div class="p-2">
+              <div class="card shadow-none border-2 border-dashed border-primary-hover position-relative square-container">
+                <div class="d-flex justify-content-center content">
+                  <a href="#" class="d-block">
+                    <img class="img-fluid rounded-2" alt="..." src="https://images.unsplash.com/photo-1651984293033-4f3f465da333?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800&q=80" />
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="px-4 pt-2 pb-4">
+            <h6 class="font-semibold mb-2 text-center">Image Forgery Detection Output</h6>
+            <span class="d-block"></span>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap flex-lg-row gap-3 justify-content-center">
+      <button class="btn btn-neutral" onclick="processCompressDetection()">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/zip.svg') }}" class="h-5" alt="...">
+        </span>
+        Compression Detection
+      </button>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/metadata.svg') }}" class="h-5" alt="...">
+        </span>
+        Meta Data Analysis
+      </a>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/spy.svg') }}" class="h-5" alt="...">
+        </span>
+        CFA Artifact Detection
+      </a>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/noise.svg') }}" class="h-5" alt="...">
+        </span>
+        Noise Inconsistency
+      </a>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/error.svg') }}" class="h-5" alt="...">
+        </span>
+        Error Level Analysis
+      </a>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/image.svg') }}" class="h-5" alt="...">
+        </span>
+        Image Extraction
+      </a>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/string.svg') }}" class="h-5" alt="...">
+        </span>
+        String Extraction
+      </a>
+      <a href="#" class="btn btn-neutral">
+        <span class="icon icon-sm pe-2">
+          <img src="{{ url_for('static', filename='images/icons/copy.svg') }}" class="h-5" alt="...">
+        </span>
+        Copy Move Detection
+      </a>
+    </div>
+
+  </div>  
+</div>
+{% endblock %}

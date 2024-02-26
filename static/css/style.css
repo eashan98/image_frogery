@@ -1,0 +1,21 @@
+.navbar-vertical .navbar-nav .nav-link{
+    padding: .75rem 1rem;
+}
+
+.square-container {
+    position: relative;
+    width: 100%; /* Adjust this to set the width as a percentage or any fixed value */
+    padding-bottom: 100%; /* This is the trick to maintain the square aspect ratio */
+}
+
+.content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#preview_image{
+    object-fit: cover;
+}
