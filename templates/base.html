@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}Image Forgery Detection</title>
+    <link href="https://unpkg.com/@webpixels/css@1.2.6/dist/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="d-flex flex-column flex-lg-row h-lg-full bg-surface-secondary">
+        {% include 'common/sidebar.html' %}
+        <div class="flex-lg-1 h-screen overflow-y-lg-auto">
+            {% include 'common/header.html' %}
+            <main class="py-6 bg-surface-secondary">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% include 'common/footer.html' %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
