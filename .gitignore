@@ -29,3 +29,10 @@ dist/
 venv/
 
 # Ignore the Python interpreter
+
+# Ignore temporary files
+temp/*
+
+# Ignore input and output files
+static/input/images/*
+static/output/images/*
