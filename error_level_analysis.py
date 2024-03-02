@@ -7,7 +7,7 @@ def detect(input_path,output_path, filename):
     
     image = os.path.join(input_path, filename)
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
-    TEMP = f'temp_{current_time}.jpg'
+    TEMP = f'temp/temp_{current_time}.jpg'
     SCALE = 10
     
     original = Image.open(image)
