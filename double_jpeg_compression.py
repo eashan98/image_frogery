@@ -1,15 +1,18 @@
 import numpy as np
 import cv2
+import os
 
 from scipy import fftpack as fftp
 from matplotlib import pyplot as plt
 
 
-def detect(image):
+def detect(input_path,output_path, filename):
     thres = 0.5
 
     dct_rows = 0
     dct_cols = 0
+    
+    image = os.path.join(input_path, filename)
 
     image = cv2.imread(image)
     shape = image.shape
