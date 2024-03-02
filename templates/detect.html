@@ -28,40 +28,40 @@
                       </div>
                     </div>
                     <div id="uploaded_image">
-                      <img id="preview_image" class="img-fluid rounded-2 w-full h-full" onerror="this.style.display='none'" />
+                      <img id="preview_image" class="img-fluid rounded-3 w-full h-full" onerror="this.style.display='none'" />
                     </div>
                   </div>
                 </div>
               </div>
               <div class="px-4 pt-2 pb-4">
-                <h6 class="font-semibold mb-2 text-center" id="file_name">Upload image to check forgery</h6>
+                <h6 class="font-semibold mb-2 text-center text-ellipsis" id="file_name">Upload image to check forgery</h6>
                 <span class="d-block"></span>
               </div>
           </div>
       </div>
       <div class="col-xl-4 col-sm-6">
-        <div class="card border-0 shadow shadow-4-hover">
+        <div class="card border-0 shadow">
             <div class="p-2">
-              <div class="card shadow-none border-2 border-dashed border-primary-hover position-relative square-container">
+              <div class="card shadow-none border-2 border-dashed position-relative square-container">
                 <div class="d-flex justify-content-center content">
-                  <div id="output_content">
+                  <div id="output_content" class="max-w-full">
                     <div class="text-center h-full d-flex flex-column justify-content-center">
-                      <div class="d-flex justify-content-center text-sm mt-3">
-                        <p class="font-semibold" id="output_content_heading">Output will be shown here.</p>
+                      <div class="d-flex justify-content-center text-sm mt-3 overflow-auto">
+                        <p class="font-semibold max-w-full" id="output_content_heading">Output will be shown here!</p>
                       </div>
                       <p class="text-xs text-gray-500" id="output_content_subheading">
                         Please select any option to see output
                       </p>
                     </div>
                   </div>
-                  <div id="output_image">
-                    <img id="preview_output_image" class="img-fluid rounded-2 w-full h-full" onerror="this.style.display='none'" />
+                  <div id="output_image" class="max-w-full">
+                    <img id="preview_output_image" class="img-fluid rounded-3 w-full h-full" onerror="this.style.display='none'" />
                   </div>
                 </div>
               </div>
             </div>
             <div class="px-4 pt-2 pb-4">
-            <h6 class="font-semibold mb-2 text-center">Image Forgery Detection Output</h6>
+            <h6 class="font-bold mb-2 text-center text-ellipsis" id="output_title">Output</h6>
             <span class="d-block"></span>
             </div>
         </div>
