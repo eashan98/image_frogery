@@ -1,11 +1,10 @@
 from flask import Flask, request, render_template, jsonify
-import base64
-from PIL import Image
-from io import BytesIO
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 from optparse import OptionParser
+
+from flask_sqlalchemy import SQLAlchemy
 
 import double_jpeg_compression
 import image_extraction
@@ -20,6 +19,23 @@ app = Flask(__name__)
 
 app.config['INPUT_DIR'] = 'static/input/images'
 app.config['OUTPUT_DIR'] = 'static/output/images'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/image_forgery'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+class ImageProcessingHistory(db.Model):
+    __tablename__ = 'history'
+    id = db.Column(db.Integer, primary_key=True)
+    input = db.Column(db.String(500))
+    output = db.Column(db.String(500))
+    output_type = db.Column(db.String(10))
+    action = db.Column(db.String(100))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"ImageProcessingHistory(id={self.id}, input={self.input}, output={self.output}, output_type={self.output_type}, action={self.action}, timestamp={self.timestamp})"
 
 cmd = OptionParser("usage: %prog image_file [options]")
 cmd.add_option('', '--imauto',
@@ -73,14 +89,21 @@ def processCompressDetection():
         double_compressed = double_jpeg_compression.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
         
         if double_compressed:
-            return jsonify({'status': True, 'type':'danger', 'message': 'Double Compression Found', 'data': 'The image is double compressed!'})
+            output = "Double Compression Found"
+            response = {'status': True, 'type':'danger', 'message': 'Double Compression Found', 'data': 'The image is double compressed!'}
         else:
-            return jsonify({'status': False, 'type':'success', 'message': 'Single Compression Found', 'data': 'The image is single compressed!'})
+            output = "Single Compression Found"
+            response = {'status': False, 'type':'success', 'message': 'Single Compression Found', 'data': 'The image is single compressed!'}
+        
+        history_entry = ImageProcessingHistory(input=filename, output_type="text", output=output, action="Compression Detection")
+        db.session.add(history_entry)
+        db.session.commit()
+        
+        return jsonify(response)
 
     except Exception as e:
         return jsonify({'status': False, 'type':'danger', 'message': "Error Exception", 'data': str(e)})
     
-
 @app.route('/processMetaDataAnalysis', methods=['POST'])
 def processMetaDataAnalysis():
     try:
@@ -100,6 +123,10 @@ def processMetaDataAnalysis():
         file.save(os.path.join(app.config['INPUT_DIR'], filename))
                 
         image_meta_data_extracted = image_meta_data_extraction.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
+        
+        history_entry = ImageProcessingHistory(input=filename, output_type="text", output=image_meta_data_extracted, action="Meta Data Extraction")
+        db.session.add(history_entry)
+        db.session.commit()
                 
         if image_meta_data_extracted:
             return jsonify({'status': True, 'type':'success', 'message': 'Meta Data Found', 'data': image_meta_data_extracted})
@@ -108,7 +135,6 @@ def processMetaDataAnalysis():
 
     except Exception as e:
         return jsonify({'status': False, 'type':'danger', 'message': "Error Exception", 'data': str(e)})
-    
     
 @app.route('/processCfaArtifactDetection', methods=['POST'])
 def processCfaArtifactDetection():
@@ -129,6 +155,10 @@ def processCfaArtifactDetection():
         file.save(os.path.join(app.config['INPUT_DIR'], filename))
                 
         image_cfa_artifact = cfa_artifact.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename, opt, args)
+        
+        history_entry = ImageProcessingHistory(input=filename, output_type="image", output=filename, action="CFA Artifact Detection")
+        db.session.add(history_entry)
+        db.session.commit()
                 
         if image_cfa_artifact:
             return jsonify({'status': True, 'type':'danger', 'message': 'CFA Artifacts Detected', 'data': str(image_cfa_artifact) + ' CFA artifacts detected!', 'image': os.path.join(app.config['OUTPUT_DIR'], filename)})
@@ -157,11 +187,19 @@ def processNoiseInconsistency():
         file.save(os.path.join(app.config['INPUT_DIR'], filename))
                 
         image_noise_inconsistency = noise_inconsistency.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
-                
+        
         if image_noise_inconsistency:
-            return jsonify({'status': True, 'type':'danger', 'message': 'Noise Inconsistency Found', 'data': 'Noise inconsistency found!'})
+            output = "Noise Inconsistency Found"
+            response = {'status': True, 'type':'danger', 'message': 'Noise Inconsistency Found', 'data': 'Noise inconsistency found!'}
         else:
-            return jsonify({'status': True, 'type':'success', 'message': 'No Noise Inconsistency Found', 'data': 'No noise inconsistency found with image!'})
+            output = "No Noise Inconsistency Found"
+            response = {'status': True, 'type':'success', 'message': 'No Noise Inconsistency Found', 'data': 'No noise inconsistency found with image!'}
+        
+        history_entry = ImageProcessingHistory(input=filename, output_type="text", output=output, action="Noise Inconsistency Detection")
+        db.session.add(history_entry)
+        db.session.commit()
+                
+        return jsonify(response)
 
     except Exception as e:
         return jsonify({'status': False, 'type':'danger', 'message': "Error Exception", 'data': str(e)})
@@ -186,6 +224,10 @@ def processErrorLevelAnalysis():
                 
         image_error_level_analysis = error_level_analysis.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
                 
+        history_entry = ImageProcessingHistory(input=filename, output_type="image", output=filename, action="Error Level Analysis")
+        db.session.add(history_entry)
+        db.session.commit()
+        
         if image_error_level_analysis:
             return jsonify({'status': True, 'type':'success', 'message': 'Image Error Level Analysis Completed', 'data': 'Image error level analysis completed successfuly!', 'image': os.path.join(app.config['OUTPUT_DIR'], filename)})
         else:
@@ -214,6 +256,10 @@ def processImageExtraction():
                 
         image_extracted = image_extraction.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
         
+        history_entry = ImageProcessingHistory(input=filename, output_type="image", output=filename, action="Image Extraction")
+        db.session.add(history_entry)
+        db.session.commit()
+        
         if image_extracted:
             return jsonify({'status': True, 'type':'success', 'message': 'Image Extracted Successfuly', 'data': 'Image extracted successfuly!', 'image': os.path.join(app.config['OUTPUT_DIR'], filename)})
         else:
@@ -241,10 +287,20 @@ def processStringExtraction():
         file.save(os.path.join(app.config['INPUT_DIR'], filename))
                 
         image_string_extraction = string_extraction.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
-                
+        
         if image_string_extraction:
+            output_filename = filename.split('.')[0]
+            with open(os.path.join(app.config['OUTPUT_DIR'], output_filename + '.txt'), 'w') as f:
+                image_string_extraction_data = image_string_extraction.replace('<pre>', '').replace('</pre>', '')
+                f.write(image_string_extraction_data)
+            history_entry = ImageProcessingHistory(input=filename, output_type="file", output=output_filename + '.txt', action="String Extraction")
+            db.session.add(history_entry)
+            db.session.commit()
             return jsonify({'status': True, 'type':'success', 'message': "Image String Extracted", 'data': image_string_extraction})
         else:
+            history_entry = ImageProcessingHistory(input=filename, output_type="text", output="String Extraction Failed", action="String Extraction")
+            db.session.add(history_entry)
+            db.session.commit()
             return jsonify({'status': False, 'type':'danger', 'message': 'Image String Extraction Failed', 'data': 'Image string extraction failed due to some error!'})
 
     except Exception as e:
@@ -269,6 +325,10 @@ def processCopyMoveDetection():
         file.save(os.path.join(app.config['INPUT_DIR'], filename))
                 
         image_copy_move_detection = copy_move_detection.detect(app.config['INPUT_DIR'],app.config['OUTPUT_DIR'], filename)
+        
+        history_entry = ImageProcessingHistory(input=filename, output_type="image", output=filename, action="Copy Move Detection")
+        db.session.add(history_entry)
+        db.session.commit()
         
         if image_copy_move_detection:
             return jsonify({'status': True, 'type':'danger', 'message': 'Copy Move Forgery Detected', 'data': 'Copy move forgery detected in image!', 'image': os.path.join(app.config['OUTPUT_DIR'], filename)})
