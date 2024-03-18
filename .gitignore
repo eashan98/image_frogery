@@ -36,3 +36,6 @@ temp/*
 # Ignore input and output files
 static/input/images/*
 static/output/images/*
+
+## Ignore databse file
+databse/*
