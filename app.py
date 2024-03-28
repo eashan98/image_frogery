@@ -15,10 +15,15 @@ import error_level_analysis
 import string_extraction
 import copy_move_detection
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from dateutil import tz
+from sqlalchemy import or_
+
 app = Flask(__name__)
 
-app.config['INPUT_DIR'] = 'static/input/images'
-app.config['OUTPUT_DIR'] = 'static/output/images'
+app.config['INPUT_DIR'] = 'static/input'
+app.config['OUTPUT_DIR'] = 'static/output'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/image_forgery'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -56,9 +61,14 @@ cmd.add_option(
     '', '--blint', help='Block intersection threshold. (default: %default)', default=0.2)
 opt, args = cmd.parse_args()
 
+@app.template_filter('humanize')
+def humanize_time_difference_filter(target_time):
+    return humanize_time_difference(target_time)
+
 @app.route('/')
 def home():
-    return render_template('history.html')
+    data = ImageProcessingHistory.query.order_by(ImageProcessingHistory.timestamp.desc()).all()
+    return render_template('history.html', data=data, app=app)
 
 @app.route('/detect')
 def detect():
@@ -66,7 +76,69 @@ def detect():
 
 @app.route('/history')
 def history():
-    return render_template('history.html')
+    action = request.args.get('action')
+    if action:
+        data = ImageProcessingHistory.query.filter(or_(
+            ImageProcessingHistory.action.like(f'%{action}%')
+        )).order_by(ImageProcessingHistory.timestamp.desc()).all()
+    else:
+        data = ImageProcessingHistory.query.order_by(ImageProcessingHistory.timestamp.desc()).all()
+    return render_template('history.html', data=data, app=app)
+
+@app.route('/samples')
+def samples():
+    action = request.args.get('action')
+    samples = {
+        'compression_detection': [
+            "static/samples/images/compression_detection/sample1.jpg",
+            "static/samples/images/compression_detection/sample2.jpg",
+            "static/samples/images/compression_detection/sample3.jpg",
+            "static/samples/images/compression_detection/sample4.jpg",
+        ],
+        'meta_data_analysis': [
+            "static/samples/images/meta_data_analysis/sample1.jpg",
+            "static/samples/images/meta_data_analysis/sample2.jpg",
+            "static/samples/images/meta_data_analysis/sample3.jpg",
+            "static/samples/images/meta_data_analysis/sample4.jpg",
+            "static/samples/images/meta_data_analysis/sample5.jpg",
+        ],
+        'cfa_artifact_detection': [
+            "static/samples/images/cfa_artifact_detection/sample1.jpeg",
+            "static/samples/images/cfa_artifact_detection/sample2.jpg",
+            "static/samples/images/cfa_artifact_detection/sample3.jpg",
+            "static/samples/images/cfa_artifact_detection/sample4.jpeg",
+            "static/samples/images/cfa_artifact_detection/sample5.jpeg",
+            "static/samples/images/cfa_artifact_detection/sample6.jpeg",
+        ],
+        'noise_inconsistency': [
+            "static/samples/images/noise_inconsistency/sample1.png",
+            "static/samples/images/noise_inconsistency/sample2.jpg",
+        ],
+        'error_level_analysis': [
+            "static/samples/images/error_level_analysis/sample1.jpg",
+            "static/samples/images/error_level_analysis/sample2.jpg",
+        ],
+        'image_extraction': [
+            "static/samples/images/image_extraction/sample1.png",
+        ],
+        'string_extraction': [
+            "static/samples/images/string_extraction/sample1.jpg",
+            "static/samples/images/string_extraction/sample2.jpg",
+            "static/samples/images/string_extraction/sample3.jpg",
+        ],
+        'copy_move_detection': [
+            "static/samples/images/copy_move_detection/sample1.png",
+            "static/samples/images/copy_move_detection/sample2.jpg",
+            "static/samples/images/copy_move_detection/sample3.jpeg",
+            "static/samples/images/copy_move_detection/sample4.jpeg",
+            "static/samples/images/copy_move_detection/sample5.jpeg",
+        ],
+    }
+    if action:
+        data = samples.get(action, [])
+    else:
+        data = []
+    return render_template('samples.html', data=data)
 
 @app.route('/processCompressDetection', methods=['POST'])
 def processCompressDetection():
@@ -339,5 +411,23 @@ def processCopyMoveDetection():
         return jsonify({'status': False, 'type':'danger', 'message': "Error Exception", 'data': str(e)})
 
 
+
+def humanize_time_difference(target_time):
+    now = datetime.now(target_time.tzinfo)  # Ensure both times are in the same timezone
+    diff = relativedelta(now, target_time)
+    
+    if diff.years > 0:
+        return f"{diff.years} {'year' if diff.years == 1 else 'years'} ago"
+    elif diff.months > 0:
+        return f"{diff.months} {'month' if diff.months == 1 else 'months'} ago"
+    elif diff.days > 0:
+        return f"{diff.days} {'day' if diff.days == 1 else 'days'} ago"
+    elif diff.hours > 0:
+        return f"{diff.hours} {'hour' if diff.hours == 1 else 'hours'} ago"
+    elif diff.minutes > 0:
+        return f"{diff.minutes} {'minute' if diff.minutes == 1 else 'minutes'} ago"
+    else:
+        return "Just now"
+    
 if __name__ == '__main__':
     app.run(debug=True)

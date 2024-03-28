@@ -2,10 +2,15 @@
     padding: .75rem 1rem;
 }
 
+.nav-item.active .nav-link{
+    background-color: #dbe8f5 !important;
+    font-weight: 600 !important;
+}
+
 .square-container {
     position: relative;
     width: 100%; /* Adjust this to set the width as a percentage or any fixed value */
-    padding-bottom: 100%; /* This is the trick to maintain the square aspect ratio */
+    padding-bottom: 100% !important; /* This is the trick to maintain the square aspect ratio */
 }
 
 .content {
@@ -24,4 +29,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.object-fit-cover{
+    object-fit: cover;
 }

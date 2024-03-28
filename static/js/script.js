@@ -159,3 +159,102 @@ function forgeryDetection(detectionType) {
         alert(error)
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    var inputField = document.getElementById('searchInput');
+    inputField?.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            var searchValue = inputField.value.trim();
+            var redirectUrl = '/history?action=' + encodeURIComponent(searchValue);
+            window.location.href = redirectUrl;
+        }
+    });
+
+    var currentUrl = window.location.pathname + window.location.search;
+    var navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    var isLinkFound = false;
+    navLinks.forEach(function(navLink) {
+        var linkUrl = navLink.getAttribute('href');
+        if (currentUrl === linkUrl) {
+            isLinkFound = true;
+            var parentLi = navLink.closest('.nav-item');
+            if (parentLi) parentLi.classList.add('active');
+            var parentCollapse = parentLi.closest('.collapse');
+            if (parentCollapse) parentCollapse.classList.add('show');
+            var nearestCollapseToggle = parentLi.closest('.parent-nav-item')?.querySelector('[data-bs-toggle="collapse"]');
+            if (nearestCollapseToggle) {
+                nearestCollapseToggle.classList.add('active');
+                nearestCollapseToggle.setAttribute('aria-expanded', 'true');
+            }
+            return;
+        }
+    });
+
+    if (!isLinkFound) {
+        navLinks.forEach(function(navLink) {
+            var linkUrl = navLink.getAttribute('href');
+            if (currentUrl.includes(linkUrl)) {
+                isLinkFound = true;
+                var parentLi = navLink.closest('.nav-item');
+                if (parentLi) parentLi.classList.add('active');
+                var parentCollapse = parentLi.closest('.collapse');
+                if (parentCollapse) parentCollapse.classList.add('show');
+                var nearestCollapseToggle = parentLi.closest('.parent-nav-item')?.querySelector('[data-bs-toggle="collapse"]');
+                if (nearestCollapseToggle) {
+                    nearestCollapseToggle.classList.add('active');
+                    nearestCollapseToggle.setAttribute('aria-expanded', 'true');
+                }
+                return;
+            }
+        });
+    }
+
+});
+
+function showHistoryDetail(input, output, output_type, action) {
+    const actionTitle = document.getElementById('actionTitle');
+    const modal_preview_image = document.getElementById('modal_preview_image');
+    const preview_output_image = document.getElementById('modal_preview_output_image');
+    const output_content = document.getElementById('modal_output_content');
+    const output_image = document.getElementById('modal_output_image');
+    const output_content_heading = document.getElementById('modal_output_content_heading');
+    const output_content_subheading = document.getElementById('modal_output_content_subheading');
+    const input_download = document.getElementById('modal_input_download');
+    const output_download = document.getElementById('modal_output_download');
+    const input_dir = document.getElementById('input_dir').value;
+    const output_dir = document.getElementById('output_dir').value;
+
+    output_content_heading.innerHTML = output;
+
+
+    output_download.href = output_dir+'/'+output;
+    output_download.download = output_dir+'/'+output;
+    output_content_subheading.textContent = 'Image Processed Successfully';
+
+    actionTitle.innerHTML = action;
+    modal_preview_image.src = input_dir+'/'+input;
+    input_download.href = input_dir+'/'+input;
+    input_download.download = input_dir+'/'+input;
+
+    if(output_type == 'text'){
+        output_download.style.display = 'none';
+        output_content.style.display = 'block';
+        output_image.style.display = 'none';
+        output_image.classList.remove('w-full');
+    }
+    if(output_type == 'file'){
+        output_content.style.display = 'block';
+        output_image.style.display = 'none';
+        output_image.classList.remove('w-full');
+        output_download.style.display = 'block';
+    }
+    if(output_type == 'image'){
+        output_content.style.display = 'none';
+        output_image.style.display = 'block';
+        output_image.classList.add('w-full');
+        preview_output_image.src = output_dir+'/'+output;
+        preview_output_image.style.display = 'block';
+        output_download.style.display = 'block';
+    }
+    $('#modal_detailed').modal('show');
+}

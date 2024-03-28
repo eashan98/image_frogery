@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Samples | {% endblock %}
+{% set headerTitle = "Image Forgery Data Samples" %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="vstack gap-6">
+            <div class="row g-6" id="lightgallery">
+                {% for image in data %}
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="card border-0 shadow">
+                            <div class="p-2 square-container">
+                                <div class="d-flex justify-content-center content">
+                                    <div class="max-w-full">
+                                        <img class="img-fluid rounded-3 object-fit-cover w-full h-full" alt="..." src="{{ image }}" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-4 pt-2 pb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="text-xs text-muted">
+                                <i class="bi bi-lock me-1"></i>Download Sample
+                                </div>
+                                <div class="text-xs text-muted ms-auto">
+                                  <a href="{{image}}" download="{{image}}">
+                                    <img src="{{ url_for('static', filename='images/icons/download.svg') }}" class="h-5 cursor-pointer" alt="...">
+                                  </a>
+                                </div>
+                            </div>
+                            <span class="d-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if data|length == 0 %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow">
+                            <div class="p-2 h-96">
+                                <div class="d-flex justify-content-center content">
+                                    <div class="max-w-full">
+                                        <img class="img-fluid rounded-3 object-fit-cover w-full h-full" alt="..." src="{{ url_for('static', filename='images/no_data_found.png') }}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
