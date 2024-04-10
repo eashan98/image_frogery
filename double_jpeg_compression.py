@@ -1,3 +1,7 @@
+import matplotlib
+
+matplotlib.use('Agg')
+
 import numpy as np
 import cv2
 import os
@@ -6,24 +10,24 @@ from scipy import fftpack as fftp
 from matplotlib import pyplot as plt
 
 
-def detect(input_path,output_path, filename):
+def detect(input_path, output_path, filename):
     thres = 0.5
 
     dct_rows = 0
     dct_cols = 0
-    
+
     image = os.path.join(input_path, filename)
 
     image = cv2.imread(image)
     shape = image.shape
 
     if shape[0] % 8 != 0:
-        dct_rows = shape[0]+8-shape[0] % 8
+        dct_rows = shape[0] + 8 - shape[0] % 8
     else:
         dct_rows = shape[0]
 
     if shape[1] % 8 != 0:
-        dct_cols = shape[1]+8-shape[1] % 8
+        dct_cols = shape[1] + 8 - shape[1] % 8
     else:
         dct_cols = shape[1]
 
@@ -34,9 +38,9 @@ def detect(input_path,output_path, filename):
 
     w = y.shape[1]
     h = y.shape[0]
-    n = w*h/64
+    n = w * h / 64
 
-    Y = y.reshape(h//8, 8, -1, 8).swapaxes(1, 2).reshape(-1, 8, 8)
+    Y = y.reshape(h // 8, 8, -1, 8).swapaxes(1, 2).reshape(-1, 8, 8)
 
     qDCT = []
 
@@ -52,16 +56,17 @@ def detect(input_path,output_path, filename):
     # flag = True
     for idx, ax in enumerate(a1):
         k += 1
-        data = qDCT[:, int(idx/8), int(idx % 8)]
-        val, key = np.histogram(data, bins=np.arange(data.min(), data.max()+1))
+        data = qDCT[:, int(idx / 8), int(idx % 8)]
+        val, key = np.histogram(
+            data, bins=np.arange(data.min(), data.max() + 1))
         # val, key = np.histogram(data, bins=np.arange(data.min(), data.max()+1), normed=True)
         z = np.absolute(fftp.fft(val))
         z = np.reshape(z, (len(z), 1))
-        rotz = np.roll(z, int(len(z)/2))
+        rotz = np.roll(z, int(len(z) / 2))
 
         slope = rotz[1:] - rotz[:-1]
-        indices = [i+1 for i in range(len(slope)-1)
-                   if slope[i] > 0 and slope[i+1] < 0]
+        indices = [i + 1 for i in range(len(slope) - 1)
+                   if slope[i] > 0 and slope[i + 1] < 0]
 
         peak_count = 0
 
@@ -69,7 +74,9 @@ def detect(input_path,output_path, filename):
             if rotz[j][0] > thres:
                 peak_count += 1
 
-        if(k==3):
-            if peak_count>=20: return True
-            else: return False
-            # flag = False         
+        if(k == 3):
+            plt.savefig(os.path.join(output_path, filename))
+            if peak_count >= 20:
+                return True
+            else:
+                return False

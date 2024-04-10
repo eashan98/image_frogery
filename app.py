@@ -162,12 +162,12 @@ def processCompressDetection():
         
         if double_compressed:
             output = "Double Compression Found"
-            response = {'status': True, 'type':'danger', 'message': 'Double Compression Found', 'data': 'The image is double compressed!'}
+            response = {'status': True, 'type':'danger', 'message': 'Double Compression Found', 'data': 'The image is double compressed!', 'image': os.path.join(app.config['OUTPUT_DIR'], filename)}
         else:
             output = "Single Compression Found"
-            response = {'status': False, 'type':'success', 'message': 'Single Compression Found', 'data': 'The image is single compressed!'}
+            response = {'status': True, 'type':'success', 'message': 'Single Compression Found', 'data': 'The image is single compressed!', 'image': os.path.join(app.config['OUTPUT_DIR'], filename)}
         
-        history_entry = ImageProcessingHistory(input=filename, output_type="text", output=output, action="Compression Detection")
+        history_entry = ImageProcessingHistory(input=filename, output_type="image", output=filename, action="Compression Detection")
         db.session.add(history_entry)
         db.session.commit()
         
